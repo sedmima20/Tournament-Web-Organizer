@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+
+  <meta charset="UTF-8">
+  <title>Tournament Web-Organizer</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div id="header">
+
+  <a href="index.html"><img src="img/logo.PNG" alt="logo" id="logo"></a>
+  <p id="username-tag" class="must-be-logged-in"><img src="img/user_icon.png" alt="user-icon">{uživatelské jméno}</p>
+  <ul id="account-menu">
+    <li class="must-not-be-logged-in"><a href="login.html">Přihlásit se</a></li>
+    <li class="must-not-be-logged-in"><a href="register.html">Zaregistrovat se</a></li>
+    <li class="must-be-logged-in"><a href="account.html?username={uživatelské jméno}" id="account-management-link">Správa účtu</a></li>
+    <li class="must-be-logged-in"><a href="login.html">Odhlásit se</a></li>
+  </ul>
+
+</div>
+
+<div id="nav-menu">
+
+  <ul id="navigation-menu">
+    <li id="selected-nav-menu-item"><a href="index.html">Domů</a></li>
+    <li class="must-be-logged-in"><a href="tournaments.html?username={uživatelské jméno}" id="tournaments-link">Turnaje</a></li>
+    <li class="must-not-be-logged-in"><a href="tournaments.html">Veřejné turnaje</a></li>
+    <li class="must-be-logged-in must-be-staff-or-higher"><a href="user-search.html">Rozhraní pro správce</a></li>
+    <li><a href="https://github.com/sedmima20/Tournament-Web-Organizer/wiki" target="_blank">Nápověda</a></li>
+    <li><a href="https://github.com/sedmima20" target="_blank">Autor projektu</a></li>
+  </ul>
+
+</div>
+
+<div id="content">
+
+  <div id="response-box"><p id="response-text">{text odpovědi}</p><img src="img/cross.png" alt="cross" id="response-box-cross"></div>
+
+  <h1 class="must-have-user-reading-perms"><span class="must-be-self-query">Můj účet</span><span class="must-be-another-user-query">Účet uživatele {uživatelské jméno}</span></h1>
+  <p id="main-paragraph" class="must-have-user-reading-perms">Vítej na stránce <span class="must-be-self-query">svého účtu</span><span class="must-be-another-user-query">účtu uživatele {uživatelské jméno}</span>.<span class="must-be-self-query"> Tvé uživatelské jméno je {uživatelské jméno}.</span><br><a href="tournaments.html?username={uživatelské jméno}">Zobrazit <span class="must-be-self-query">moje turnaje</span><span class="must-be-another-user-query">turnaje tohoto uživatele</span></a>.</p>
+
+  <h2 class="must-have-user-reading-perms">Statistiky</h2>
+
+  <div id="statistics-box" class="must-have-user-reading-perms">
+
+    <ul>
+      <li id="tournament-count-text">Celkový počet turnajů: {počet turnajů}</li>
+      <li id="player-count-text">Celkový počet hráčů napříč všemi turnaji: {počet hráčů}</li>
+      <li id="match-count-text">Celkový počet zápasů napříč všemi turnaji: {počet zápasů}</li>
+    </ul>
+
+  </div>
+
+  <h2 class="must-have-user-reading-perms">Propojené účty</h2>
+
+  <div id="linked-services-box" class="must-have-user-reading-perms">
+
+    <ul>
+      <li id="scratchwars-zone-text">scratchwars.zone (nepřipojeno)(připravujeme)</li>
+    </ul>
+
+  </div>
+
+  <h2 class="must-have-user-writing-perms">Nastavení</h2>
+
+  <div id="settings-box" class="must-have-user-writing-perms">
+
+    <p>Vyplň pouze ty hodnoty, které chceš upravit.</p>
+
+    <h3>Úprava uživatelského jména</h3>
+    <input form="settings-form" type="text" placeholder="Nové uživatelské jméno" maxlength="50" id="settings-form-new-username">
+
+    <h3>Úprava hesla</h3>
+    <input form="settings-form" type="password" placeholder="Nové heslo" minlength="8" maxlength="100" id="settings-form-new-password">
+    <input form="settings-form" type="password" placeholder="Nové heslo znovu" minlength="8" maxlength="100" id="settings-form-new-password-confirm">
+
+    <h3>Úroveň oprávnění (pouze pro administrátory)</h3>
+    <label><input form="settings-form" type="radio" name="new-permission-level" value="user" id="settings-form-new-permission-level-user">User</label>
+    <label><input form="settings-form" type="radio" name="new-permission-level" value="staff" id="settings-form-new-permission-level-staff">Staff</label>
+    <label><input form="settings-form" type="radio" name="new-permission-level" value="admin" id="settings-form-new-permission-level-admin">Admin</label>
+    <label><input form="settings-form" type="radio" name="new-permission-level" value="sysadmin" id="settings-form-new-permission-level-sysadmin">Sysadmin</label>
+
+    <form id="settings-form">
+      <input type="password" placeholder="Zadej heslo" required id="settings-form-password">
+      <input type="submit" value="Uložit změny">
+    </form>
+
+  </div>
+
+  <h2 class="must-have-user-writing-perms">Nebezpečná zóna</h2>
+
+  <div id="danger-zone-box" class="must-have-user-writing-perms">
+
+    <p>Dvakrát měř, jednou řež.</p>
+
+    <h3>Reset uživatelského účtu</h3>
+    <form id="wipe-tournaments-form">
+      <input type="password" placeholder="Zadej heslo" required id="wipe-tournaments-form-password">
+      <label id="wipe-tournaments-form-checkbox-label"><input type="checkbox" required>Uvědomuji si, že tuto akci nelze vrátit zpět</label>
+      <input type="submit" value="Vymazat všechny turnaje">
+    </form>
+
+    <h3>Odstranění uživatelského účtu</h3>
+    <form id="delete-account-form">
+      <input type="password" placeholder="Zadej heslo" required id="delete-account-form-password">
+      <label id="delete-account-form-checkbox-label"><input type="checkbox" required>Uvědomuji si, že tuto akci nelze vrátit zpět</label>
+      <input type="submit" value="Smazat účet">
+    </form>
+
+  </div>
+
+</div>
+
+<div id="footer">
+
+  <ul id="footer-menu">
+    <li><a href="terms.html">Podmínky používání webu</a></li>
+    <li><a href="privacy.html">Ochrana osobních údajů</a></li>
+  </ul>
+  <p id="cookies-text">Zpracováváme pouze funkční cookies, které jsou nezbytně nutné pro zajištění provozu webových stránek.</p>
+
+</div>
+
+</body>
+</html>
