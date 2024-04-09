@@ -28,4 +28,6 @@ export default function useTwoApiRequest() {
             setIsLoading(false);
         }
     }
+
+    return { isLoading, responseData, statusCode, isRequestError, fetchData }
 }
