@@ -8,7 +8,7 @@ export default function useLocalStorageState(key, defaultValue) {
 
     useEffect(() => {
         localStorage.setItem(key, state);
-    }, [state, key]);
+    }, [state]);
 
     return [state, setState];
 }
