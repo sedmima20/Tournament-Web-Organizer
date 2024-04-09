@@ -1,11 +1,23 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
+import useLocalStorageState from '/hooks/useLocalStorageState.jsx'
+import useTwoApiRequest from './hooks/useTwoApiRequest.jsx';
 import HomePage from '/pages/HomePage.jsx'
 import RegisterPage from '/pages/RegisterPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
 
 export default function App() {
+    const [token, setToken] = useLocalStorageState('authToken', '');
+    const checkTokenRequest = useTwoApiRequest({
+        endpoint: 'is_token_valid',
+        token: token
+    });
+
+    useEffect(() => {
+        // Zkontroluj platnost tokenu (pokud není prázdný). Pokud je token neplatný, nastav ho na prázdný string.
+    }, []);
+
     return (
         <Router>
             <header>
