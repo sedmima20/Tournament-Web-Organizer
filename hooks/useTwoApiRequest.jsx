@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function useTwoApiRequest(defaultRequestData = []) {
+export default function useTwoApiRequest(defaultRequestData = {}) {
     const [isLoading, setIsLoading] = useState(false);
     const [responseData, setResponseData] = useState(undefined);
     const [statusCode, setStatusCode] = useState(undefined);
