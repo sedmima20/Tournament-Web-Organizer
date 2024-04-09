@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-export default function useTwoApiRequest() {
+export default function useTwoApiRequest(defaultRequestData = []) {
     const [isLoading, setIsLoading] = useState(false);
     const [responseData, setResponseData] = useState(undefined);
     const [statusCode, setStatusCode] = useState(undefined);
     const [isRequestError, setIsRequestError] = useState(false);
 
-    const fetchData = async (requestData) => {
+    const fetchData = async (requestData = defaultRequestData) => {
         setIsLoading(true);
         try {
             const response = await fetch('https://sedmima20.sps-prosek.cz/projekty/php/turnajovy-software/index.php', {
