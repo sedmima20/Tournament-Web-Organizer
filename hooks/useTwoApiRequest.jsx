@@ -3,7 +3,7 @@ import { useState } from 'react';
 export default function useTwoApiRequest(defaultRequestData = {}) {
     const [responseData, setResponseData] = useState(undefined);
     const [statusCode, setStatusCode] = useState(undefined);
-    const [isError, setIsError] = useState(false);
+    const [isRequestError, setIsRequestError] = useState(false);
 
     const fetchData = async (requestData = defaultRequestData) => {
         try {
@@ -24,15 +24,15 @@ export default function useTwoApiRequest(defaultRequestData = {}) {
 
             setStatusCode(response.status);
             setResponseData(json);
-            setIsError(false);
-            return { statusCode: response.status, responseData: json, isError: false }
+            setIsRequestError(false);
+            return { statusCode: response.status, responseData: json, isRequestError: false }
         } catch {
             setStatusCode(undefined);
             setResponseData(undefined);
-            setIsError(true);
-            return { statusCode: undefined, responseData: undefined, isError: true }
+            setIsRequestError(true);
+            return { statusCode: undefined, responseData: undefined, isRequestError: true }
         }
     }
 
-    return { statusCode, responseData, isError, fetchData }
+    return { statusCode, responseData, isRequestError, fetchData }
 }
