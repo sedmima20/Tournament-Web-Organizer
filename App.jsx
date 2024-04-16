@@ -12,7 +12,7 @@ export default function App() {
     const intervalRef = useRef();
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
-        token: token // Updatují se defaultní data do hooku, když se změní například token? Zjistit.
+        token: token
     });
 
     // Kontrola tokenu při prvním vyrenderování hlavní komponety, při každé změně tokenu a také každých 30 sekund (platnost může vypršet)
