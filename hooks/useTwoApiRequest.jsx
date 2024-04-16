@@ -1,13 +1,11 @@
 import { useState } from 'react';
 
 export default function useTwoApiRequest(defaultRequestData = {}) {
-    const [isLoading, setIsLoading] = useState(false);
     const [responseData, setResponseData] = useState(undefined);
     const [statusCode, setStatusCode] = useState(undefined);
-    const [isRequestError, setIsRequestError] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const fetchData = async (requestData = defaultRequestData) => {
-        setIsLoading(true);
         try {
             const response = await fetch('https://sedmima20.sps-prosek.cz/projekty/php/turnajovy-software/index.php', {
                 method: 'POST',
@@ -17,17 +15,24 @@ export default function useTwoApiRequest(defaultRequestData = {}) {
                 body: new URLSearchParams(requestData),
             });
 
+            let json;
+            try {
+                json = await response.json();
+            } catch {
+                json = undefined;
+            }
+
             setStatusCode(response.status);
-            setResponseData(await response.json());
-            setIsRequestError(false);
+            setResponseData(json);
+            setIsError(false);
+            return { statusCode: response.status, responseData: json, isError: false }
         } catch {
             setStatusCode(undefined);
             setResponseData(undefined);
-            setIsRequestError(true);
-        } finally {
-            setIsLoading(false);
+            setIsError(true);
+            return { statusCode: undefined, responseData: undefined, isError: true }
         }
     }
 
-    return { isLoading, responseData, statusCode, isRequestError, fetchData }
+    return { statusCode, responseData, isError, fetchData }
 }
