@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
 import useLocalStorageState from '/hooks/useLocalStorageState.jsx'
 import useTwoApiRequest from './hooks/useTwoApiRequest.jsx';
@@ -9,14 +9,35 @@ import logo from '/images/logo.png'
 
 export default function App() {
     const [token, setToken] = useLocalStorageState('authToken', '');
+    const intervalRef = useRef();
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
-        token: token
+        token: token // Updatují se defaultní data do hooku, když se změní například token? Zjistit.
     });
 
+    // Kontrola tokenu při prvním vyrenderování hlavní komponety, při každé změně tokenu a také každých 30 sekund (platnost může vypršet)
     useEffect(() => {
-        // Zkontroluj platnost tokenu (pokud není prázdný). Pokud je token neplatný, nastav ho na prázdný string.
-    }, []);
+        checkToken();
+
+        intervalRef.current = setInterval(checkToken, 30000);
+
+        return () => {
+            clearInterval(intervalRef.current);
+        };
+    }, [token]);
+
+    // Nastavení tokenu na prázdný string, pokud je neplatný, plus informování uživatele. Zbytek aplikace už počítá s tím, že prázdný string je neplatný token a kterýkoli jiný string je platný token.
+    const checkToken = () => {
+        if (token) {
+            checkTokenRequest.fetchData()
+                .then((data) => {
+                    if (data.statusCode === 401) {
+                        setToken('');
+                        alert("Jejda, přihlášení vypršelo :( Pokud bys i nadále rád(a) spravoval(a) své turnaje, znovu se prosím přihlas.");
+                    }
+                })
+        }
+    }
 
     return (
         <Router>
