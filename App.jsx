@@ -10,7 +10,7 @@ import logo from '/images/logo.png'
 
 export default function App() {
     const [token, setToken] = useLocalStorageState('authToken', '')
-    const intervalRef = useRef()
+    const intervalRef = useRef(null)
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
         token: token
