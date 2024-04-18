@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
 export default function useTwoApiRequest(defaultRequestData = {}) {
-    const [responseData, setResponseData] = useState(undefined);
-    const [statusCode, setStatusCode] = useState(undefined);
-    const [isRequestError, setIsRequestError] = useState(false);
+    const [responseData, setResponseData] = useState(undefined)
+    const [statusCode, setStatusCode] = useState(undefined)
+    const [isRequestError, setIsRequestError] = useState(false)
 
     const fetchData = async (requestData = defaultRequestData) => {
         try {
@@ -13,23 +13,23 @@ export default function useTwoApiRequest(defaultRequestData = {}) {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams(requestData),
-            });
+            })
 
-            let json;
+            let json
             try {
-                json = await response.json();
+                json = await response.json()
             } catch {
-                json = undefined;
+                json = undefined
             }
 
-            setStatusCode(response.status);
-            setResponseData(json);
-            setIsRequestError(false);
+            setStatusCode(response.status)
+            setResponseData(json)
+            setIsRequestError(false)
             return { statusCode: response.status, responseData: json, isRequestError: false }
         } catch {
-            setStatusCode(undefined);
-            setResponseData(undefined);
-            setIsRequestError(true);
+            setStatusCode(undefined)
+            setResponseData(undefined)
+            setIsRequestError(true)
             return { statusCode: undefined, responseData: undefined, isRequestError: true }
         }
     }

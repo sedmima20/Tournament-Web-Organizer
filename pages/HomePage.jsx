@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom'
 export default function HomePage() {
     const navigate = useNavigate()
 
-    function handleClick() {
-        navigate('/registrace')
+    function handleSignupClick() {
+        navigate('/signup')
     }
 
     return (
@@ -37,7 +37,7 @@ export default function HomePage() {
             </section>
             <section>
                 <h2>Lorem ipsum</h2>
-                <button onClick={handleClick}>Vytvořit organizátorský účet</button>
+                <button onClick={handleSignupClick}>Vytvořit organizátorský účet</button>
             </section>
         </>
     )

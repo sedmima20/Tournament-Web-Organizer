@@ -1,30 +1,31 @@
-import React, {useEffect, useRef} from 'react'
+import React, { useEffect, useRef } from 'react'
 import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
 import useLocalStorageState from '/hooks/useLocalStorageState.jsx'
-import useTwoApiRequest from './hooks/useTwoApiRequest.jsx';
+import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import HomePage from '/pages/HomePage.jsx'
-import RegisterPage from '/pages/RegisterPage.jsx'
+import LoginPage from '/pages/LoginPage.jsx'
+import SignupPage from '/pages/SignupPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
 
 export default function App() {
-    const [token, setToken] = useLocalStorageState('authToken', '');
-    const intervalRef = useRef();
+    const [token, setToken] = useLocalStorageState('authToken', '')
+    const intervalRef = useRef()
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
         token: token
-    });
+    })
 
     // Kontrola tokenu při prvním vyrenderování hlavní komponety, při každé změně tokenu a také každých 30 sekund (platnost může vypršet)
     useEffect(() => {
-        checkToken();
+        checkToken()
 
-        intervalRef.current = setInterval(checkToken, 30000);
+        intervalRef.current = setInterval(checkToken, 30000)
 
         return () => {
-            clearInterval(intervalRef.current);
-        };
-    }, [token]);
+            clearInterval(intervalRef.current)
+        }
+    }, [token])
 
     // Nastavení tokenu na prázdný string, pokud je neplatný, plus informování uživatele. Zbytek aplikace už počítá s tím, že prázdný string je neplatný token a kterýkoli jiný string je platný token.
     const checkToken = () => {
@@ -32,8 +33,8 @@ export default function App() {
             checkTokenRequest.fetchData()
                 .then((data) => {
                     if (data.statusCode === 401) {
-                        setToken('');
-                        alert("Jejda, přihlášení vypršelo :( Pokud bys i nadále rád(a) spravoval(a) své turnaje, znovu se prosím přihlas.");
+                        setToken('')
+                        alert("Jejda, přihlášení vypršelo :( Pokud bys i nadále rád(a) spravoval(a) své turnaje, znovu se prosím přihlas.")
                     }
                 })
         }
@@ -52,14 +53,15 @@ export default function App() {
                         <Link to="/">Domů</Link>
                     </li>
                     <li>
-                        <Link to="/registrace">Vytvořit účet</Link>
+                        <Link to="/signup">Vytvořit účet</Link>
                     </li>
                 </ul>
             </nav>
             <main>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/registrace" element={<RegisterPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </main>
