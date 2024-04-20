@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
-export default function DialogBox(props) {
+export default function ModalDialog(props) {
     const dialogRef = useRef(null)
 
     // Automatické otevření a zavření vanilla HTML/JS dialogového okna při vyrenderování a při destrukci komponenty
