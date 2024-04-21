@@ -16,6 +16,7 @@ export default function App() {
     const [isConnected, setIsConnected] = useState(true)
     const checkTokenIntervalRef = useRef(null)
     const checkConnectionIntervalRef = useRef(null)
+    const isInitConnRef = useRef(true)
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
         token: token
@@ -42,6 +43,16 @@ export default function App() {
             clearInterval(checkConnectionIntervalRef.current)
         }
     }, [])
+
+    // Zobrazení info alertu "Opět online!" po obnovení připojení. Také skrytí tohoto alertu v případě, že bylo spojení po chvíli zase ztraceno.
+    useEffect(() => {
+        if (isInitConnRef.current) {
+            isInitConnRef.current = false
+        } else {
+            if (isConnected) setAlertContent({ msg: 'Opět online!', severity: 'info' })
+            if (!isConnected && alertContent && alertContent.msg === 'Opět online!') setAlertContent(undefined)
+        }
+    }, [isConnected])
 
     // Nastavení tokenu na prázdný string, pokud je neplatný, plus informování uživatele. Zbytek aplikace už počítá s tím, že prázdný string je neplatný token a kterýkoli jiný string je platný token.
     const checkToken = () => {
