@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState, useContext } from 'react'
-import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
+import { Route, Routes, Link, useNavigate } from 'react-router-dom'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import { TokenContext } from '/contexts/TokenContext.jsx'
 import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
 import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
+import TournamentsPage from '/pages/TournamentsPage.jsx'
+import UserPage from '/pages/UserPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
 import closingX from '/images/closing-x.png'
@@ -14,11 +16,17 @@ export default function App() {
     const { token, setToken } = useContext(TokenContext)
     const { alertContent, setAlertContent } = useContext(AlertContentContext)
     const [isConnected, setIsConnected] = useState(true)
+    const [userData, setUserData] = useState(undefined)
     const checkTokenIntervalRef = useRef(null)
     const checkConnectionIntervalRef = useRef(null)
     const isInitConnRef = useRef(true)
+    const navigate = useNavigate()
     const checkTokenRequest = useTwoApiRequest({
         endpoint: 'is_token_valid',
+        token: token
+    })
+    const getLoggedUserRequest = useTwoApiRequest({
+        endpoint: 'get_user',
         token: token
     })
 
@@ -30,6 +38,18 @@ export default function App() {
 
         return () => {
             clearInterval(checkTokenIntervalRef.current)
+        }
+    }, [token])
+
+    // Získání dat uživatele při prvním vyrenderování komponenty a poté při změnách tokenu. Také smazání dat v případě, že uživatel není přihlášený.
+    useEffect(() => {
+        if (token) {
+            getLoggedUserRequest.fetchData()
+                .then((data) => {
+                    setUserData(data.responseData)
+                })
+        } else {
+            setUserData(undefined)
         }
     }, [token])
 
@@ -61,7 +81,7 @@ export default function App() {
                 .then((data) => {
                     if (data.statusCode === 401) {
                         setToken('')
-                        alert("Jejda, přihlášení vypršelo :( Pokud bys i nadále rád(a) spravoval(a) své turnaje, znovu se prosím přihlas.")
+                        setAlertContent({ msg: 'Jejda, přihlášení vypršelo :( Pokud bys i nadále rád(a) spravoval(a) své turnaje, znovu se prosím přihlas.', severity: 'warning' })
                     }
                 })
         }
@@ -90,20 +110,62 @@ export default function App() {
         setAlertContent(undefined)
     }
 
+    function handleLogoutClick() {
+        setToken('')
+        setAlertContent({ msg: 'Odhlášeno!', severity: 'info' })
+        navigate('/login')
+    }
+
     return (
-        <Router>
+        <>
             <header>
                 <Link to="/">
                     <img src={logo} alt="logo" className="logo"/>
                 </Link>
+                {token ?
+                    <div>
+                        <p>Přihlášen(a) jako „{userData ? userData.username : "načítání..."}“</p>
+                        <Link to={userData ? "/tournaments/" + userData.username : "/tournaments"}>Moje turnaje</Link>
+                        <Link to={userData ? "/user/" + userData.username : "/user"}>Spravovat účet</Link>
+                        <a onClick={handleLogoutClick}>Odhlásit se</a>
+                    </div> :
+                    <div>
+                        <Link to="/login">Přihlášení</Link>
+                        <Link to="/signup">Registrace</Link>
+                    </div>
+                }
             </header>
             <nav>
                 <ul>
+                    {token ?
+                        <li>
+                            <Link to={userData ? "/tournaments/" + userData.username : "/tournaments"}>Moje turnaje</Link>
+                        </li> :
+                        <li>
+                            <Link to="/">Domů</Link>
+                        </li>
+                    }
+                    {token ?
+                        <li>
+                            <Link to="/tournaments">Veřejné turnaje</Link>
+                        </li> :
+                        <li>
+                            <Link to="/tournaments">Turnaje</Link>
+                        </li>
+                    }
+                    {token ?
+                        <li>
+                            <Link to={userData ? "/user/" + userData.username : "/user"}>Správa účtu</Link>
+                        </li> :
+                        <li>
+                            <Link to="/login">Přihlášení/registrace</Link>
+                        </li>
+                    }
                     <li>
-                        <Link to="/">Domů</Link>
+                        <Link to="/wiki">Nápověda</Link>
                     </li>
                     <li>
-                        <Link to="/signup">Vytvořit účet</Link>
+                        <a>Více</a>
                     </li>
                 </ul>
             </nav>
@@ -114,6 +176,8 @@ export default function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/tournaments/:username?" element={<TournamentsPage />} />
+                    <Route path="/user/:username" element={<UserPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </main>
@@ -125,6 +189,6 @@ export default function App() {
                     Copyright © 2024 Martin Sedmihradský
                 </div>
             </footer>
-        </Router>
+        </>
     )
 }
