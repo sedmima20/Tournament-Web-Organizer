@@ -2,14 +2,17 @@ import React, { useEffect, useRef, useState, useContext } from 'react'
 import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import { TokenContext } from '/contexts/TokenContext.jsx'
+import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
 import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
+import closingX from '/images/closing-x.png'
 
 export default function App() {
     const { token, setToken } = useContext(TokenContext)
+    const { alertContent, setAlertContent } = useContext(AlertContentContext)
     const [isConnected, setIsConnected] = useState(true)
     const checkTokenIntervalRef = useRef(null)
     const checkConnectionIntervalRef = useRef(null)
@@ -72,6 +75,10 @@ export default function App() {
         }
     }
 
+    function handleCloseAlertClick() {
+        setAlertContent(undefined)
+    }
+
     return (
         <Router>
             <header>
@@ -90,6 +97,7 @@ export default function App() {
                 </ul>
             </nav>
             <main>
+                {alertContent && <div className={alertContent.severity + "-box"}>{alertContent.msg}<img src={closingX} alt="alert-closing-x-icon" onClick={handleCloseAlertClick}/></div>}
                 {!isConnected && <div className="warning-box">Buď náš server podal výpověď, nebo tvé připojení k internetu udělalo pápá 👋</div>}
                 <Routes>
                     <Route path="/" element={<HomePage />} />
