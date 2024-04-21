@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useContext } from 'react'
 import { HashRouter as Router, Route, Routes, Link } from 'react-router-dom'
-import useLocalStorageState from '/hooks/useLocalStorageState.jsx'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
+import { TokenContext } from '/contexts/TokenContext.jsx'
 import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
@@ -9,7 +9,7 @@ import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
 
 export default function App() {
-    const [token, setToken] = useLocalStorageState('authToken', '')
+    const { token, setToken } = useContext(TokenContext)
     const [isConnected, setIsConnected] = useState(true)
     const checkTokenIntervalRef = useRef(null)
     const checkConnectionIntervalRef = useRef(null)
