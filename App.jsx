@@ -154,6 +154,11 @@ export default function App() {
                             <Link to="/tournaments">Turnaje</Link>
                         </li>
                     }
+                    {loggedUserData && loggedUserData.type !== "user" &&
+                        <li>
+                            <Link to="/admin">Administrace</Link>
+                        </li>
+                    }
                     {token ?
                         <li>
                             <Link to={loggedUserData ? "/user/" + loggedUserData.username : "/user"}>Správa účtu</Link>
