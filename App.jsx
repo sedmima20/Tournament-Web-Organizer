@@ -3,6 +3,7 @@ import { Route, Routes, Link, useNavigate } from 'react-router-dom'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import { TokenContext } from '/contexts/TokenContext.jsx'
 import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
+import { LoggedUserDataContext } from '/contexts/LoggedUserDataContext.jsx'
 import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
@@ -15,8 +16,8 @@ import closingX from '/images/closing-x.png'
 export default function App() {
     const { token, setToken } = useContext(TokenContext)
     const { alertContent, setAlertContent } = useContext(AlertContentContext)
+    const { loggedUserData, setLoggedUserData } = useContext(LoggedUserDataContext)
     const [isConnected, setIsConnected] = useState(true)
-    const [userData, setUserData] = useState(undefined)
     const checkTokenIntervalRef = useRef(null)
     const checkConnectionIntervalRef = useRef(null)
     const isInitConnRef = useRef(true)
@@ -46,10 +47,10 @@ export default function App() {
         if (token) {
             getLoggedUserRequest.fetchData()
                 .then((data) => {
-                    setUserData(data.responseData)
+                    setLoggedUserData(data.responseData)
                 })
         } else {
-            setUserData(undefined)
+            setLoggedUserData(undefined)
         }
     }, [token])
 
@@ -124,9 +125,9 @@ export default function App() {
                 </Link>
                 {token ?
                     <div>
-                        <p>Přihlášen(a) jako „{userData ? userData.username : "načítání..."}“</p>
-                        <Link to={userData ? "/tournaments/" + userData.username : "/tournaments"}>Moje turnaje</Link>
-                        <Link to={userData ? "/user/" + userData.username : "/user"}>Spravovat účet</Link>
+                        <p>Přihlášen(a) jako „{loggedUserData ? loggedUserData.username : "načítání..."}“</p>
+                        <Link to={loggedUserData ? "/tournaments/" + loggedUserData.username : "/tournaments"}>Moje turnaje</Link>
+                        <Link to={loggedUserData ? "/user/" + loggedUserData.username : "/user"}>Spravovat účet</Link>
                         <a onClick={handleLogoutClick}>Odhlásit se</a>
                     </div> :
                     <div>
@@ -139,7 +140,7 @@ export default function App() {
                 <ul>
                     {token ?
                         <li>
-                            <Link to={userData ? "/tournaments/" + userData.username : "/tournaments"}>Moje turnaje</Link>
+                            <Link to={loggedUserData ? "/tournaments/" + loggedUserData.username : "/tournaments"}>Moje turnaje</Link>
                         </li> :
                         <li>
                             <Link to="/">Domů</Link>
@@ -155,7 +156,7 @@ export default function App() {
                     }
                     {token ?
                         <li>
-                            <Link to={userData ? "/user/" + userData.username : "/user"}>Správa účtu</Link>
+                            <Link to={loggedUserData ? "/user/" + loggedUserData.username : "/user"}>Správa účtu</Link>
                         </li> :
                         <li>
                             <Link to="/login">Přihlášení/registrace</Link>
