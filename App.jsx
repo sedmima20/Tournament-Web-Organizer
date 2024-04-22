@@ -18,8 +18,8 @@ export default function App() {
     const { alertContent, setAlertContent } = useContext(AlertContentContext)
     const { loggedUserData, setLoggedUserData } = useContext(LoggedUserDataContext)
     const [isConnected, setIsConnected] = useState(true)
-    const checkTokenIntervalRef = useRef(null)
-    const checkConnectionIntervalRef = useRef(null)
+    const checkTokenIntervalRef = useRef(undefined)
+    const checkConnectionIntervalRef = useRef(undefined)
     const isInitConnRef = useRef(true)
     const navigate = useNavigate()
     const checkTokenRequest = useTwoApiRequest({
