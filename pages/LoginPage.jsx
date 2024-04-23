@@ -27,7 +27,7 @@ export default function LoginPage() {
         if (isLoginRequestSuccess && loggedUserData) {
             navigate('/tournaments/' + loggedUserData.username)
         }
-    }, [isLoginRequestSuccess, loggedUserData]);
+    }, [isLoginRequestSuccess, loggedUserData])
 
     function handleLoginFormDataChange(event) {
         setLoginFormData(prevLoginFormData => {
