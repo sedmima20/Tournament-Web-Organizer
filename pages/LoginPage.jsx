@@ -83,6 +83,7 @@ export default function LoginPage() {
                     disabled={isOngoingRequest}
                 />
                 <button onClick={handleLoginFormSubmit} disabled={!loginFormData.username || !loginFormData.password || isOngoingRequest}>Přihlásit se</button>
+                <p>Nepamatuješ si heslo? Napiš nám na <a href="mailto:place@holder.com">place@holder.com</a>, pomůžeme ti znovu získat přístup ke tvému účtu.</p>
                 <p>Ještě nemáš účet? Neváhej, <Link to="/signup">zaregistruj se</Link> a připoj se k ostatním organizátorům, kteří používají TWO.</p>
             </section>
         </>
