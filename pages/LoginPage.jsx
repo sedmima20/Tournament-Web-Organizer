@@ -3,7 +3,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import { TokenContext } from '/contexts/TokenContext.jsx'
 import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
 import { LoggedUserDataContext } from '/contexts/LoggedUserDataContext.jsx'
-import useTwoApiRequest from "../hooks/useTwoApiRequest.jsx";
+import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 
 export default function LoginPage() {
     const { token, setToken } = useContext(TokenContext)
