@@ -23,13 +23,11 @@ export default function TournamentsPage() {
             })
                 .then((data) => {
                     setTournamentsData(data.responseData)
-                    console.log(data.responseData)
                 })
         } else {
             getPublicTournamentsRequest.fetchData()
                 .then((data) => {
                     setTournamentsData(data.responseData)
-                    console.log(data.responseData)
                 })
         }
     }, [token, queryUsername])
