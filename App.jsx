@@ -182,8 +182,8 @@ export default function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/tournaments/:username?" element={<TournamentsPage />} />
-                    <Route path="/user/:username" element={<UserPage />} />
+                    <Route path="/tournaments/:queryUsername?" element={<TournamentsPage />} />
+                    <Route path="/user/:queryUsername" element={<UserPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </main>
