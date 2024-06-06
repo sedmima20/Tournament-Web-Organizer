@@ -92,6 +92,7 @@ export default function SignupPage() {
                     placeholder="Uživatelské jméno"
                     onChange={handleSignupFormDataChange}
                     name="username"
+                    value={signupFormData.username}
                     maxLength="50"
                     disabled={isOngoingRequest}
                 />
@@ -100,6 +101,7 @@ export default function SignupPage() {
                     placeholder="Heslo"
                     onChange={handleSignupFormDataChange}
                     name="password"
+                    value={signupFormData.password}
                     maxLength="80"
                     disabled={isOngoingRequest}
                 />
@@ -108,6 +110,7 @@ export default function SignupPage() {
                     placeholder="Zadej heslo znovu"
                     onChange={handleSignupFormDataChange}
                     name="password2"
+                    value={signupFormData.password2}
                     maxLength="80"
                     disabled={isOngoingRequest}
                 />

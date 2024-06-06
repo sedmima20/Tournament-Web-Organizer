@@ -71,6 +71,7 @@ export default function LoginPage() {
                     placeholder="Uživatelské jméno"
                     onChange={handleLoginFormDataChange}
                     name="username"
+                    value={loginFormData.username}
                     maxLength="50"
                     disabled={isOngoingRequest}
                 />
@@ -79,6 +80,7 @@ export default function LoginPage() {
                     placeholder="Heslo"
                     onChange={handleLoginFormDataChange}
                     name="password"
+                    value={loginFormData.password}
                     maxLength="80"
                     disabled={isOngoingRequest}
                 />
