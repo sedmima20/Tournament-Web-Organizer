@@ -5,20 +5,17 @@ import App from './App.jsx'
 import { TokenProvider } from './contexts/TokenProvider.jsx'
 import { AlertContentProvider } from './contexts/AlertContentProvider.jsx'
 import { LoggedUserDataProvider } from './contexts/LoggedUserDataProvider.jsx'
-import { ModalDialogContentProvider } from './contexts/ModalDialogContentProvider.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <Router>
-            <ModalDialogContentProvider>
-                <LoggedUserDataProvider>
-                    <AlertContentProvider>
-                        <TokenProvider>
-                            <App />
-                        </TokenProvider>
-                    </AlertContentProvider>
-                </LoggedUserDataProvider>
-            </ModalDialogContentProvider>
+            <LoggedUserDataProvider>
+                <AlertContentProvider>
+                    <TokenProvider>
+                        <App />
+                    </TokenProvider>
+                </AlertContentProvider>
+            </LoggedUserDataProvider>
         </Router>
     </React.StrictMode>,
 )
