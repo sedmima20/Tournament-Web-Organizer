@@ -4,12 +4,14 @@ import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import { TokenContext } from '/contexts/TokenContext.jsx'
 import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
 import { LoggedUserDataContext } from '/contexts/LoggedUserDataContext.jsx'
+import { ModalDialogContentContext } from '/contexts/ModalDialogContentContext.jsx'
 import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
 import TournamentsPage from '/pages/TournamentsPage.jsx'
 import UserPage from '/pages/UserPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
+import ModalDialog from '/components/ModalDialog.jsx'
 import logo from '/images/logo.png'
 import closingX from '/images/closing-x.png'
 
@@ -17,6 +19,7 @@ export default function App() {
     const { token, setToken } = useContext(TokenContext)
     const { alertContent, setAlertContent } = useContext(AlertContentContext)
     const { loggedUserData, setLoggedUserData } = useContext(LoggedUserDataContext)
+    const { modalDialogContent, setModalDialogContent } = useContext(ModalDialogContentContext)
     const [isConnected, setIsConnected] = useState(true)
     const checkTokenIntervalRef = useRef(undefined)
     const checkConnectionIntervalRef = useRef(undefined)
@@ -119,6 +122,7 @@ export default function App() {
 
     return (
         <>
+            {modalDialogContent && <ModalDialog>{modalDialogContent}</ModalDialog>}
             <header>
                 <Link to="/">
                     <img src={logo} alt="logo" className="logo"/>
