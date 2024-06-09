@@ -17,6 +17,9 @@ export default function TournamentsPage() {
     const [isOngoingRequest, setIsOngoingRequest] = useState(false)
     const [isCreateTournamentDialogOpen, setIsCreateTournamentDialogOpen] = useState(false)
     const [createTournamentFormData, setCreateTournamentFormData] = useState({tournamentName: ""})
+    const [pageNumber, setPageNumber] = useState(1)
+    const [tournamentsPerPage, setTournamentsPerPage] = useState(8)
+    const [searchString, setSearchString] = useState('')
     const { queryUsername } = useParams()
     const getTournamentsRequest = useTwoApiRequest()
     const getPublicTournamentsRequest = useTwoApiRequest({
@@ -27,7 +30,7 @@ export default function TournamentsPage() {
 
     useEffect(() => {
         loadTournaments()
-    }, [token, queryUsername])
+    }, [token, queryUsername, pageNumber, tournamentsPerPage, searchString])
 
     // Ověření, zda má přihlášený uživatel právo na zápis zobrazeného uživatele a jeho turnajů
     useEffect(() => {
@@ -45,14 +48,17 @@ export default function TournamentsPage() {
         }
     }, [token, queryUsername])
 
-    // Funkce pro načítání seznamu turnajů. Spouští se useEffectem hned po načtení stránky, při změně tokenu a při případné změně username v query. Spustí se také hned po vytvoření nového turnaje.
+    // Funkce pro načítání seznamu turnajů. Spouští se useEffectem hned po načtení stránky, při změně tokenu, při případné změně username v query, při změně vyhledávacího řetězce, při změně čísla stránky a při změně počtu turnajů na jednu stránku. Spustí se také hned po vytvoření nového turnaje.
     // V případě, že v query chybí username, jsou načteny nejnovější veřejné turnaje, nikoli turnaje konkrétního uživatele.
     function loadTournaments() {
         if (queryUsername) {
             getTournamentsRequest.fetchData({
                 endpoint: 'get_user_tournaments',
                 username: queryUsername,
-                token: token
+                token: token,
+                page: pageNumber,
+                records_on_page: tournamentsPerPage,
+                name_filter: '%' + searchString + '%'
             })
                 .then((data) => {
                     setTournamentsData(data.responseData)
@@ -91,7 +97,9 @@ export default function TournamentsPage() {
                     if (data.statusCode === 201) {
                         setAlertContent({ msg: 'Turnaj byl vytvořen 👍', severity: 'info' })
                         closeCreateTournamentDialog()
-                        loadTournaments()
+                        if (pageNumber === 1 && searchString === '') loadTournaments() // Pokud už jsou ve stavových proměnných defaultní hodnoty, tak na následujících řádcích neproběhnou žádné aktualizace, které by spustily useEffect pro načtení turnajů. Místo toho zde spustíme načítací funkci manuálně. Podmínka zde musí být, aby v ostatních případech nedošlo k duplicitnímu dotazu na API.
+                        setPageNumber(1)
+                        setSearchString('')
                         // přesměrovat na nástěnku? jak to udělat? API zatím nevrací ID vytvořeného turnaje
                     } else {
                         setDialogAlertContent({ msg: 'Něco se pokazilo, turnaj se nám nepodařilo vytvořit.', severity: 'error' })
@@ -105,6 +113,11 @@ export default function TournamentsPage() {
         setIsCreateTournamentDialogOpen(false)
         setCreateTournamentFormData({tournamentName: ""})
         setDialogAlertContent(undefined)
+    }
+
+    function handleSearchTournamentInputDataChange(event) {
+        setPageNumber(1)
+        setSearchString(event.target.value)
     }
 
     return (
@@ -137,6 +150,20 @@ export default function TournamentsPage() {
                     }
                 </h1>
                 {hasUserWriteAccess && <button onClick={handleCreateTournamentClick}>Vytvořit turnaj</button>}
+                {tournamentsData && queryUsername && (pageNumber !== 1 || tournamentsData.length >= tournamentsPerPage || searchString) &&
+                    <>
+                        <input
+                            type="search"
+                            placeholder="Vyhledat turnaj"
+                            onChange={handleSearchTournamentInputDataChange}
+                            name="searchString"
+                            value={searchString}
+                            maxLength="100"
+                        />
+                        <button onClick={() => setPageNumber(prevPageNumber => prevPageNumber - 1)} disabled={pageNumber <= 1}>&lt;</button>
+                        <button onClick={() => setPageNumber(prevPageNumber => prevPageNumber + 1)} disabled={tournamentsData.length < tournamentsPerPage}>&gt;</button>
+                    </>
+                }
                 {tournamentsData ?
                     (tournamentsData.length !== 0 ?
                         <table>
@@ -169,9 +196,12 @@ export default function TournamentsPage() {
                             </tbody>
                         </table> :
                         (queryUsername ?
-                            (loggedUserData && loggedUserData.username === queryUsername ?
-                                <p>Zatím žádné turnaje. Vytvoř první!</p> :
-                                <p>Uživatel zatím nemá žádné turnaje.</p>
+                            (pageNumber === 1 && searchString === '' ?
+                                (loggedUserData && loggedUserData.username === queryUsername ?
+                                    <p>Zatím žádné turnaje. Vytvoř první!</p> :
+                                    <p>Uživatel zatím nemá žádné turnaje.</p>
+                                ) :
+                                <p>Nenalezeny žádné turnaje.</p>
                             ) :
                             <p>Momentálně nejsou naplánovány žádné veřejné turnaje.</p>
                         )
