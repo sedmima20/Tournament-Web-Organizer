@@ -8,6 +8,7 @@ import HomePage from '/pages/HomePage.jsx'
 import LoginPage from '/pages/LoginPage.jsx'
 import SignupPage from '/pages/SignupPage.jsx'
 import TournamentsPage from '/pages/TournamentsPage.jsx'
+import TournamentPage from '/pages/TournamentPage.jsx'
 import UserPage from '/pages/UserPage.jsx'
 import NotFoundPage from '/pages/NotFoundPage.jsx'
 import logo from '/images/logo.png'
@@ -183,6 +184,7 @@ export default function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/tournaments/:queryUsername?" element={<TournamentsPage />} />
+                    <Route path="/tournament/:queryTournamentId/:querySubpage?" element={<TournamentPage />} />
                     <Route path="/user/:queryUsername" element={<UserPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
