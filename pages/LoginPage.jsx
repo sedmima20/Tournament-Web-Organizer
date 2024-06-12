@@ -74,6 +74,11 @@ export default function LoginPage() {
                     value={loginFormData.username}
                     maxLength="50"
                     disabled={isOngoingRequest}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            handleLoginFormSubmit()
+                        }
+                    }}
                 />
                 <input
                     type="password"
@@ -83,6 +88,11 @@ export default function LoginPage() {
                     value={loginFormData.password}
                     maxLength="80"
                     disabled={isOngoingRequest}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            handleLoginFormSubmit()
+                        }
+                    }}
                 />
                 <button onClick={handleLoginFormSubmit} disabled={!loginFormData.username || !loginFormData.password || isOngoingRequest}>Přihlásit se</button>
                 <p>Nepamatuješ si heslo? Napiš nám na <a href="mailto:place@holder.com">place@holder.com</a>, pomůžeme ti znovu získat přístup ke tvému účtu.</p>

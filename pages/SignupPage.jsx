@@ -95,6 +95,11 @@ export default function SignupPage() {
                     value={signupFormData.username}
                     maxLength="50"
                     disabled={isOngoingRequest}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            handleSignupFormSubmit()
+                        }
+                    }}
                 />
                 <input
                     type="password"
@@ -104,6 +109,11 @@ export default function SignupPage() {
                     value={signupFormData.password}
                     maxLength="80"
                     disabled={isOngoingRequest}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            handleSignupFormSubmit()
+                        }
+                    }}
                 />
                 <input
                     type="password"
@@ -113,6 +123,11 @@ export default function SignupPage() {
                     value={signupFormData.password2}
                     maxLength="80"
                     disabled={isOngoingRequest}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            handleSignupFormSubmit()
+                        }
+                    }}
                 />
                 <button onClick={handleSignupFormSubmit} disabled={!signupFormData.username || !signupFormData.password || !signupFormData.password2 || isOngoingRequest}>Vytvořit účet</button>
                 <p>Už máš účet? <Link to="/login">Přihlásit se.</Link></p>

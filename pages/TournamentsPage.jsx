@@ -135,6 +135,11 @@ export default function TournamentsPage() {
                         value={createTournamentFormData.tournamentName}
                         maxLength="100"
                         disabled={isOngoingRequest}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                                handleCreateTournamentFormSubmit()
+                            }
+                        }}
                     />
                     <button onClick={handleCreateTournamentFormSubmit} disabled={!createTournamentFormData.tournamentName || isOngoingRequest}>Vytvořit!</button>
                 </ModalDialog>
