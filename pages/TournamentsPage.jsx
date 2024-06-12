@@ -123,7 +123,7 @@ export default function TournamentsPage() {
     return (
         <>
             {isCreateTournamentDialogOpen &&
-                <ModalDialog>
+                <ModalDialog onClose={closeCreateTournamentDialog}>
                     <img src={closingX} alt="dialog-closing-x-icon" onClick={closeCreateTournamentDialog}/>
                     {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
                     <h2>Vytvořit nový turnaj</h2>

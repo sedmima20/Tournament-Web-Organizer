@@ -3,13 +3,22 @@ import React, { useEffect, useRef } from 'react'
 export default function ModalDialog(props) {
     const dialogRef = useRef(undefined)
 
-    // Automatické otevření a zavření vanilla HTML/JS dialogového okna při vyrenderování a při destrukci komponenty
+    function handleModalDialogClose() {
+        if (props.onClose) {
+            props.onClose()
+        }
+    }
+
     useEffect(() => {
+        // Automatické otevření vanilla HTML/JS modálního dialogového okna při vyrenderování komponenty
         dialogRef.current.showModal()
 
+        // Zachytávání události zavření dialogového okna pro případ, že k tomu dojde jiným způsobem, než destrukcí komponenty (např. zmáčknutím klávesy Esc). Nadřazená komponenta tuto událost zachytí a destrukci může provést dodatečně.
+        dialogRef.current.addEventListener('close', handleModalDialogClose)
+
         return () => {
-            if (dialogRef.current && dialogRef.current.open) {
-                dialogRef.current.close()
+            if (dialogRef.current) {
+                dialogRef.current.removeEventListener('close', handleModalDialogClose)
             }
         }
     }, [])
