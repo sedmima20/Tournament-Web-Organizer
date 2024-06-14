@@ -13,6 +13,7 @@ export default function TournamentPage() {
         hasTournamentWriteAccess: undefined,
         accessDenied: undefined
     })
+    const [triggerTournamentReloadValue, setTriggerTournamentReloadValue] = useState(0)
     const { queryTournamentId, querySubpage } = useParams()
     const loadTournamentDataIntervalRef = useRef(undefined)
     const getTournamentRequest = useTwoApiRequest()
@@ -21,7 +22,7 @@ export default function TournamentPage() {
     const getTournamentMatchesRequest = useTwoApiRequest()
     const checkTournamentWriteAccessRequest = useTwoApiRequest()
 
-    // Načtení všech dat turnaje při prvním vyrenderování komponety a poté každých 30 sekund. Spustí se také po případné změně tokenu nebo ID turnaje v query.
+    // Načtení všech dat turnaje při prvním vyrenderování komponety a poté každých 30 sekund. Spustí se také po případné změně tokenu nebo ID turnaje v query. Manuálně lze spustit (a resetovat interval) libovolnou aktualizací stavové proměnné triggerTournamentReloadValue například poté, co organizátor provede nějakou akci.
     useEffect(() => {
         loadTournamentData()
 
@@ -30,9 +31,9 @@ export default function TournamentPage() {
         return () => {
             clearInterval(loadTournamentDataIntervalRef.current)
         }
-    }, [token, queryTournamentId])
+    }, [token, queryTournamentId, triggerTournamentReloadValue])
 
-    // Funkce pro načtení/aktualizaci všech dat turnaje do stavové proměnné. Spouští se automaticky useEffectem nebo ručně poté, co organizátor provede nějakou akci.
+    // Funkce pro načtení/aktualizaci všech dat turnaje do stavové proměnné. Spouští se automaticky useEffectem.
     function loadTournamentData() {
         // tournament
         getTournamentRequest.fetchData({
@@ -167,15 +168,19 @@ export default function TournamentPage() {
         }
     }
 
+    function triggerTournamentReload() {
+        setTriggerTournamentReloadValue(prevTriggerTournamentReloadValue => prevTriggerTournamentReloadValue + 1)
+    }
+
     switch (querySubpage) {
         case 'participants':
-            //return <TournamentParticipantsPage tournamentData={tournamentData} loadTournamentData={loadTournamentData} />
+            //return <TournamentParticipantsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
             return <p>Účastníci</p>
         case 'settings':
-            //return <TournamentSettingsPage tournamentData={tournamentData} loadTournamentData={loadTournamentData} />
+            //return <TournamentSettingsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
             return <p>Nastavení</p>
         default:
-            //return <TournamentDashboardPage tournamentData={tournamentData} loadTournamentData={loadTournamentData} />
+            //return <TournamentDashboardPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
             return <pre>{JSON.stringify(tournamentData, null, 2)}</pre>
     }
 }
