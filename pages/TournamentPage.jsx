@@ -2,6 +2,10 @@ import React, { useContext, useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { TokenContext } from '/contexts/TokenContext.jsx'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
+import TournamentNavbar from '/components/TournamentNavbar.jsx'
+import TournamentDashboardPage from '/pages/TournamentDashboardPage.jsx'
+import TournamentParticipantsPage from '/pages/TournamentParticipantsPage.jsx'
+import TournamentSettingsPage from '/pages/TournamentSettingsPage.jsx'
 
 export default function TournamentPage() {
     const { token, setToken } = useContext(TokenContext)
@@ -172,15 +176,30 @@ export default function TournamentPage() {
         setTriggerTournamentReloadValue(prevTriggerTournamentReloadValue => prevTriggerTournamentReloadValue + 1)
     }
 
+    if (tournamentData.accessDenied) return <div className="error-box">Turnaj neexistuje nebo je soukromý 🔒</div>
+    if (!tournamentData.tournament) return <div className="error-box">Turnaj se nám nepodařilo načíst</div>
+
     switch (querySubpage) {
         case 'participants':
-            //return <TournamentParticipantsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
-            return <p>Účastníci</p>
+            return (
+                <>
+                    <TournamentNavbar queryTournamentId={queryTournamentId} hasTournamentWriteAccess={tournamentData.hasTournamentWriteAccess} />
+                    <TournamentParticipantsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
+                </>
+            )
         case 'settings':
-            //return <TournamentSettingsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
-            return <p>Nastavení</p>
+            return (
+                <>
+                    <TournamentNavbar queryTournamentId={queryTournamentId} hasTournamentWriteAccess={tournamentData.hasTournamentWriteAccess} />
+                    <TournamentSettingsPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
+                </>
+            )
         default:
-            //return <TournamentDashboardPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
-            return <pre>{JSON.stringify(tournamentData, null, 2)}</pre>
+            return (
+                <>
+                    <TournamentNavbar queryTournamentId={queryTournamentId} hasTournamentWriteAccess={tournamentData.hasTournamentWriteAccess} />
+                    <TournamentDashboardPage tournamentData={tournamentData} triggerTournamentReload={triggerTournamentReload} />
+                </>
+            )
     }
 }
