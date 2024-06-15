@@ -4,7 +4,7 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
     return (
         <>
             <section>
-                <h1>{tournamentData.tournament.name} - účastníci</h1>
+                <h1>{tournamentData.tournament.name} - Účastníci</h1>
                 <pre>{JSON.stringify(tournamentData, null, 2)}</pre>
             </section>
         </>

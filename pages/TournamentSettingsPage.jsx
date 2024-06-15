@@ -4,7 +4,7 @@ export default function TournamentSettingsPage({ tournamentData, triggerTourname
     return (
         <>
             <section>
-                <h1>{tournamentData.tournament.name} - nastavení</h1>
+                <h1>{tournamentData.tournament.name} - Nastavení</h1>
                 <pre>{JSON.stringify(tournamentData, null, 2)}</pre>
             </section>
         </>
