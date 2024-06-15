@@ -154,7 +154,7 @@ export default function TournamentsPage() {
                         "Nejnovější turnaje"
                     }
                 </h1>
-                {hasUserWriteAccess && <button onClick={handleCreateTournamentClick}>Vytvořit turnaj</button>}
+                {hasUserWriteAccess && <button onClick={handleCreateTournamentClick} disabled={isOngoingRequest}>Vytvořit turnaj</button>}
                 {tournamentsData && queryUsername && (pageNumber !== 1 || tournamentsData.length >= tournamentsPerPage || searchString) &&
                     <>
                         <input
