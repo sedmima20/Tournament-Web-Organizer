@@ -2,12 +2,24 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 export default function TournamentParticipantsPage({ tournamentData, triggerTournamentReload }) {
+    function handleAddPlayerClick() {
+        // setIsAddPlayerDialogOpen(true)
+    }
+
     return (
         <>
             <section>
                 <h1>{tournamentData.tournament.name} - Účastníci</h1>
+                {tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
+                    <button onClick={handleAddPlayerClick} disabled={false/*isOngoingRequest*/}>Přidat hráče nebo tým</button>
+                }
                 {tournamentData.players && tournamentData.players.length > 0 &&
-                    <p>Seznam účastníků ------- placeholder</p>
+                    <>
+                        {tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
+                            <p>Dvojitým poklepáním na hráče/tým změň jeho jméno.</p>
+                        }
+                        <p>Seznam účastníků ------- placeholder</p>
+                    </>
                 }
                 {tournamentData.players && tournamentData.players.length === 0 &&
                     (tournamentData.tournament.status === 'ended' ?
