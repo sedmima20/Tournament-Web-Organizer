@@ -119,6 +119,9 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                 {tournamentData.players && tournamentData.tournament.status === 'preparation' && !tournamentData.hasTournamentWriteAccess && tournamentData.tournament.description &&
                     <p>Možná se do turnaje lze přihlásit. <Link to={"/tournament/" + tournamentData.tournament.id}>Koukni do popisu</Link>, jestli tam organizátor nenechal nějaké další informace.</p>
                 }
+                {tournamentData.players && tournamentData.players.length >= 5 && tournamentData.tournament.status === 'preparation' && tournamentData.hasTournamentWriteAccess &&
+                    <p>Potřebuješ <Link to={"/tournament/" + tournamentData.tournament.id + "/settings"}>smazat všechny účastníky</Link> a začít znovu?</p>
+                }
                 {!tournamentData.players &&
                     <div className="error-box">Účastníky se nepodařilo načíst</div>
                 }
