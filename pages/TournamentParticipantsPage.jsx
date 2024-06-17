@@ -13,7 +13,10 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
     const [isOngoingRequest, setIsOngoingRequest] = useState(false)
     const [isAddPlayerDialogOpen, setIsAddPlayerDialogOpen] = useState(false)
     const [addPlayerFormData, setAddPlayerFormData] = useState({playerName: ""})
+    const [changePlayerNameFormData, setChangePlayerNameFormData] = useState({playerName: ""})
+    const [selectedChangePlayerNameId, setSelectedChangePlayerNameId] = useState(undefined)
     const addPlayerRequest = useTwoApiRequest()
+    const updatePlayerRequest = useTwoApiRequest()
 
     function handleAddPlayerClick() {
         setIsAddPlayerDialogOpen(true)
@@ -39,11 +42,11 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
             })
                 .then((data) => {
                     if (data.statusCode === 201) {
-                        setAlertContent({ msg: 'Hráč byl přidán 👍', severity: 'info' })
+                        setAlertContent({ msg: 'Hráč/tým byl přidán 👍', severity: 'info' })
                         closeAddPlayerDialog()
                         triggerTournamentReload()
                     } else {
-                        setDialogAlertContent({ msg: 'Něco se pokazilo, hráče se nám nepodařilo přidat.', severity: 'error' })
+                        setDialogAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo přidat.', severity: 'error' })
                     }
                     setIsOngoingRequest(false)
                 })
@@ -54,6 +57,51 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
         setIsAddPlayerDialogOpen(false)
         setAddPlayerFormData({playerName: ""})
         setDialogAlertContent(undefined)
+    }
+
+    function handleChangePlayerNameDoubleClick(event) {
+        if (tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' && !isOngoingRequest) {
+            setSelectedChangePlayerNameId(parseInt(event.target.getAttribute('data-player-id')))
+            setChangePlayerNameFormData({playerName: event.target.getAttribute('data-player-name')})
+        }
+    }
+
+    function handleChangePlayerNameFormDataChange(event) {
+        setChangePlayerNameFormData(prevChangePlayerNameFormData => {
+            return {
+                ...prevChangePlayerNameFormData,
+                [event.target.name]: event.target.value
+            }
+        })
+    }
+
+    function handleChangePlayerNameFormSubmit(event) {
+        if (changePlayerNameFormData.playerName && changePlayerNameFormData.playerName !== event.target.getAttribute('data-player-prev-name') && !isOngoingRequest) {
+            setIsOngoingRequest(true)
+            updatePlayerRequest.fetchData({
+                endpoint: 'update_player',
+                new_name: changePlayerNameFormData.playerName,
+                player_id: selectedChangePlayerNameId,
+                token: token
+            })
+                .then((data) => {
+                    if (data.statusCode === 204) {
+                        setAlertContent({ msg: 'Hráč/tým byl přejmenován 👍', severity: 'info' })
+                        deselectChangePlayerNameId()
+                        triggerTournamentReload()
+                    } else {
+                        setAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo přejmenovat.', severity: 'error' })
+                    }
+                    setIsOngoingRequest(false)
+                })
+        } else {
+            deselectChangePlayerNameId()
+        }
+    }
+
+    function deselectChangePlayerNameId() {
+        setSelectedChangePlayerNameId(undefined)
+        setChangePlayerNameFormData({playerName: ""})
     }
 
     return (
@@ -82,7 +130,7 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
             }
             <section>
                 <h1>{tournamentData.tournament.name} - Účastníci</h1>
-                {tournamentData.players && tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
+                {tournamentData.players && tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' && selectedChangePlayerNameId === undefined &&
                     <>
                         <button onClick={handleAddPlayerClick} disabled={isOngoingRequest || tournamentData.players.length >= 200}>Přidat hráče nebo tým</button>
                         {tournamentData.players.length >= 200 && <p>(turnaj může hrát maximálně 200 hráčů nebo týmů)</p>}
@@ -91,12 +139,36 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                 {tournamentData.players && tournamentData.players.length > 0 &&
                     <>
                         {tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
-                            <p>Dvojitým poklepáním na hráče/tým změň jeho jméno.</p>
+                            (selectedChangePlayerNameId === undefined ?
+                                <p>Dvojitým poklepáním na hráče/tým změň jeho jméno.</p> :
+                                <button disabled={!changePlayerNameFormData.playerName || isOngoingRequest}>Uložit změny</button>
+                            )
                         }
                         <ol>
                             {tournamentData.players.map(player => (
                                 <li key={player.id}>
-                                    <span style={{ textDecoration: player.excluded === "0" ? 'none' : 'line-through' }}>{player.name}</span>
+                                    {parseInt(player.id) !== selectedChangePlayerNameId ?
+                                        <span style={{ textDecoration: player.excluded === "0" ? 'none' : 'line-through' }} onDoubleClick={handleChangePlayerNameDoubleClick} data-player-id={player.id} data-player-name={player.name}>{player.name}</span> :
+                                        <input
+                                            type="text"
+                                            placeholder={player.name}
+                                            onChange={handleChangePlayerNameFormDataChange}
+                                            name="playerName"
+                                            value={changePlayerNameFormData.playerName}
+                                            maxLength="50"
+                                            disabled={isOngoingRequest}
+                                            onBlur={handleChangePlayerNameFormSubmit}
+                                            onKeyDown={(event) => {
+                                                if (event.key === 'Enter') {
+                                                    handleChangePlayerNameFormSubmit(event)
+                                                } else if (event.key === 'Escape' || event.key === 'Esc') {
+                                                    deselectChangePlayerNameId()
+                                                }
+                                            }}
+                                            autoFocus
+                                            data-player-prev-name={player.name}
+                                        />
+                                    }
                                     <span> #{player.id}</span>
                                 </li>
                             ))}
@@ -119,7 +191,7 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                 {tournamentData.players && tournamentData.tournament.status === 'preparation' && !tournamentData.hasTournamentWriteAccess && tournamentData.tournament.description &&
                     <p>Možná se do turnaje lze přihlásit. <Link to={"/tournament/" + tournamentData.tournament.id}>Koukni do popisu</Link>, jestli tam organizátor nenechal nějaké další informace.</p>
                 }
-                {tournamentData.players && tournamentData.players.length >= 5 && tournamentData.tournament.status === 'preparation' && tournamentData.hasTournamentWriteAccess &&
+                {tournamentData.players && tournamentData.players.length >= 5 && tournamentData.tournament.status === 'preparation' && tournamentData.hasTournamentWriteAccess && selectedChangePlayerNameId === undefined &&
                     <p>Potřebuješ <Link to={"/tournament/" + tournamentData.tournament.id + "/settings"}>smazat všechny účastníky</Link> a začít znovu?</p>
                 }
                 {!tournamentData.players &&
