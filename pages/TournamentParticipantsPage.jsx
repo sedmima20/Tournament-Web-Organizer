@@ -5,6 +5,7 @@ import { AlertContentContext } from '/contexts/AlertContentContext.jsx'
 import useTwoApiRequest from '/hooks/useTwoApiRequest.jsx'
 import ModalDialog from '/components/ModalDialog.jsx'
 import closingX from '/images/closing-x.png'
+import playerReactivateIcon from '/images/player-reactivate-icon.svg'
 
 export default function TournamentParticipantsPage({ tournamentData, triggerTournamentReload }) {
     const { token, setToken } = useContext(TokenContext)
@@ -14,9 +15,15 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
     const [isAddPlayerDialogOpen, setIsAddPlayerDialogOpen] = useState(false)
     const [addPlayerFormData, setAddPlayerFormData] = useState({playerName: ""})
     const [changePlayerNameFormData, setChangePlayerNameFormData] = useState({playerName: ""})
+    const [deletePlayerFormData, setDeletePlayerFormData] = useState({deletionType: ""})
     const [selectedChangePlayerNameId, setSelectedChangePlayerNameId] = useState(undefined)
+    const [selectedReactivatePlayerId, setSelectedReactivatePlayerId] = useState(undefined)
+    const [selectedDeletePlayerId, setSelectedDeletePlayerId] = useState(undefined)
     const addPlayerRequest = useTwoApiRequest()
     const updatePlayerRequest = useTwoApiRequest()
+    const softDeletePlayerRequest = useTwoApiRequest()
+    const hardDeletePlayerRequest = useTwoApiRequest()
+    const reactivatePlayerRequest = useTwoApiRequest()
 
     function handleAddPlayerClick() {
         setIsAddPlayerDialogOpen(true)
@@ -76,7 +83,7 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
     }
 
     function handleChangePlayerNameFormSubmit(event) {
-        if (changePlayerNameFormData.playerName && changePlayerNameFormData.playerName !== event.target.getAttribute('data-player-prev-name') && !isOngoingRequest) {
+        if (changePlayerNameFormData.playerName && changePlayerNameFormData.playerName !== event.target.getAttribute('data-player-prev-name') && !isOngoingRequest && selectedChangePlayerNameId !== undefined) {
             setIsOngoingRequest(true)
             updatePlayerRequest.fetchData({
                 endpoint: 'update_player',
@@ -104,6 +111,107 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
         setChangePlayerNameFormData({playerName: ""})
     }
 
+    function handleDeletePlayerClick(event) {
+        setSelectedDeletePlayerId(parseInt(event.target.getAttribute('data-player-id')))
+    }
+
+    function handleDeletePlayerFormDataChange(event) {
+        setDeletePlayerFormData(prevDeletePlayerFormData => {
+            return {
+                ...prevDeletePlayerFormData,
+                [event.target.name]: event.target.value
+            }
+        })
+    }
+
+    function handleSoftDeletePlayerFormSubmit() {
+        if (!isOngoingRequest && selectedDeletePlayerId !== undefined) {
+            setIsOngoingRequest(true)
+            softDeletePlayerRequest.fetchData({
+                endpoint: 'update_player',
+                player_id: selectedDeletePlayerId,
+                new_excluded: 1,
+                token: token
+            })
+                .then((data) => {
+                    if (data.statusCode === 204) {
+                        setAlertContent({ msg: 'Hráč/tým byl deaktivován 👍', severity: 'info' })
+                        closeDeletePlayerDialog()
+                        triggerTournamentReload()
+                    } else {
+                        setDialogAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo deaktivovat.', severity: 'error' })
+                    }
+                    setIsOngoingRequest(false)
+                })
+        }
+    }
+
+    function handleHardDeletePlayerFormSubmit() {
+        if (!isOngoingRequest && selectedDeletePlayerId !== undefined) {
+            setIsOngoingRequest(true)
+            hardDeletePlayerRequest.fetchData({
+                endpoint: 'delete_player',
+                player_id: selectedDeletePlayerId,
+                token: token
+            })
+                .then((data) => {
+                    if (data.statusCode === 204) {
+                        if (tournamentData.tournament.status === 'preparation') {
+                            setAlertContent({ msg: 'Hráč/tým byl smazán 👍', severity: 'info' })
+                        } else {
+                            setAlertContent({ msg: 'Hráč/tým byl odstraněn 👍', severity: 'info' })
+                        }
+                        closeDeletePlayerDialog()
+                        triggerTournamentReload()
+                    } else {
+                        if (tournamentData.tournament.status === 'preparation') {
+                            setDialogAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo smazat.', severity: 'error' })
+                        } else {
+                            setDialogAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo odstranit.', severity: 'error' })
+                        }
+                    }
+                    setIsOngoingRequest(false)
+                })
+        }
+    }
+
+    function closeDeletePlayerDialog() {
+        setSelectedDeletePlayerId(undefined)
+        setDeletePlayerFormData({deletionType: ""})
+        setDialogAlertContent(undefined)
+    }
+
+    function handleReactivatePlayerClick(event) {
+        setSelectedReactivatePlayerId(parseInt(event.target.getAttribute('data-player-id')))
+    }
+
+    function handleReactivatePlayerFormSubmit() {
+        if (!isOngoingRequest && selectedReactivatePlayerId !== undefined) {
+            setIsOngoingRequest(true)
+            reactivatePlayerRequest.fetchData({
+                endpoint: 'update_player',
+                player_id: selectedReactivatePlayerId,
+                new_excluded: 0,
+                token: token
+            })
+                .then((data) => {
+                    if (data.statusCode === 204) {
+                        setAlertContent({ msg: 'Hráč/tým byl znovuaktivován 👍', severity: 'info' })
+                        closeReactivatePlayerDialog()
+                        triggerTournamentReload()
+                    } else {
+                        setDialogAlertContent({ msg: 'Něco se pokazilo, hráče/tým se nám nepodařilo znovuaktivovat.', severity: 'error' })
+                    }
+                    setIsOngoingRequest(false)
+                })
+        }
+    }
+
+    function closeReactivatePlayerDialog() {
+        setSelectedReactivatePlayerId(undefined)
+        setDialogAlertContent(undefined)
+    }
+
     return (
         <>
             {isAddPlayerDialogOpen &&
@@ -126,6 +234,54 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                         }}
                     />
                     <button onClick={handleAddPlayerFormSubmit} disabled={!addPlayerFormData.playerName || isOngoingRequest}>Přidat</button>
+                </ModalDialog>
+            }
+            {selectedDeletePlayerId !== undefined &&
+                (tournamentData.tournament.status === 'preparation' ?
+                    <ModalDialog onClose={closeDeletePlayerDialog}>
+                        <img src={closingX} alt="dialog-closing-x-icon" onClick={closeDeletePlayerDialog}/>
+                        {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                        <h2>Smazat hráče/tým ze seznamu účastníků?</h2>
+                        <button onClick={handleHardDeletePlayerFormSubmit} disabled={isOngoingRequest}>Smazat</button>
+                        <button onClick={closeDeletePlayerDialog} disabled={isOngoingRequest}>Zrušit</button>
+                    </ModalDialog> :
+                    (tournamentData.players.find(player => player.id === selectedDeletePlayerId.toString())?.excluded === "1" ?
+                        <ModalDialog onClose={closeDeletePlayerDialog}>
+                            <img src={closingX} alt="dialog-closing-x-icon" onClick={closeDeletePlayerDialog}/>
+                            {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                            <h2>Odstranit hráče/tým z turnaje?</h2>
+                            <p>Hráč/tým bude odstraněn ze seznamu účastníků, z výsledkové tabulky i ze všech zápasů, které odehrál. Toto je destruktivní akce, kterou nelze vrátit zpět.</p>
+                            <button onClick={handleHardDeletePlayerFormSubmit} disabled={isOngoingRequest}>Odstranit</button>
+                            <button onClick={closeDeletePlayerDialog} disabled={isOngoingRequest}>Zrušit</button>
+                        </ModalDialog> :
+                        <ModalDialog onClose={closeDeletePlayerDialog}>
+                            <img src={closingX} alt="dialog-closing-x-icon" onClick={closeDeletePlayerDialog}/>
+                            {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                            <h2>Vyber jednu z možností</h2>
+                            <label>
+                                <input type="radio" name="deletionType" value="soft" onChange={handleDeletePlayerFormDataChange} checked={deletePlayerFormData.deletionType === "soft"} disabled={isOngoingRequest} />
+                                Nezahrnovat hráče/tým do losování nadcházejících kol
+                            </label>
+                            <p>Hráč/tým odešel z turnaje předčasně a dalších kol se už nezúčastní. Bude však ponechán v seznamu účastníků, ve výsledkové tabulce i ve všech zápasech, které stihl odehrát, a neztratí své získané skóre a pomocné hodnocení. Hráče/tým lze do turnaje kdykoli v průběhu vrátit, pokud vynechá jen některá kola.</p>
+                            <label>
+                                <input type="radio" name="deletionType" value="hard" onChange={handleDeletePlayerFormDataChange} checked={deletePlayerFormData.deletionType === "hard"} disabled={isOngoingRequest} />
+                                Úplně odstranit hráče/tým z turnaje
+                            </label>
+                            <p>Hráč/tým byl diskvalifikován a bude odstraněn ze seznamu účastníků, z výsledkové tabulky i ze všech zápasů, které odehrál. Toto je destruktivní akce, kterou nelze vrátit zpět.</p>
+                            <button onClick={deletePlayerFormData.deletionType === "hard" ? handleHardDeletePlayerFormSubmit : handleSoftDeletePlayerFormSubmit} disabled={!deletePlayerFormData.deletionType || isOngoingRequest}>Potvrdit</button>
+                            <button onClick={closeDeletePlayerDialog} disabled={isOngoingRequest}>Zrušit</button>
+                        </ModalDialog>
+                    )
+                )
+            }
+            {selectedReactivatePlayerId !== undefined &&
+                <ModalDialog onClose={closeReactivatePlayerDialog}>
+                    <img src={closingX} alt="dialog-closing-x-icon" onClick={closeReactivatePlayerDialog}/>
+                    {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                    <h2>Vrátit hráče/tým do turnaje?</h2>
+                    <p>Hráč/tým bude opět zahrnut do losování a zúčastní se nadcházejících  kol turnaje. Již nalosovaná kola, kterých se hráč/tým nezúčastnil, to nijak neovlivní.</p>
+                    <button onClick={handleReactivatePlayerFormSubmit} disabled={isOngoingRequest}>Znovuaktivovat</button>
+                    <button onClick={closeReactivatePlayerDialog} disabled={isOngoingRequest}>Zrušit</button>
                 </ModalDialog>
             }
             <section>
@@ -170,6 +326,14 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                                         />
                                     }
                                     <span> #{player.id}</span>
+                                    {tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
+                                        <>
+                                            {player.excluded === "1" &&
+                                                <button onClick={handleReactivatePlayerClick} disabled={isOngoingRequest || selectedChangePlayerNameId !== undefined} data-player-id={player.id}>️<img src={playerReactivateIcon} alt="player-reactivate-icon" data-player-id={player.id}/></button>
+                                            }
+                                            <button onClick={handleDeletePlayerClick} disabled={isOngoingRequest || selectedChangePlayerNameId !== undefined} data-player-id={player.id}>🗑️</button>
+                                        </>
+                                    }
                                 </li>
                             ))}
                         </ol>
