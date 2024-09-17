@@ -181,20 +181,20 @@ export default function TournamentsPage() {
                                     </td>
                                     <td>Organizuje: {tournament.owner_username}</td>
                                     <td>
-                                        Viditelnost: {tournament.visibility === 'public' ? "Veřejný" : "Soukromý"}<br/>
-                                        {tournament.status === 'preparation' && "Příprava"}
-                                        {tournament.status === 'running' && "Probíhá"}
-                                        {tournament.status === 'ended' && "Ukončen"}
+                                        {tournament.visibility === 'public' ? "👁️ Veřejně viditelný" : "🔒 Soukromý"}<br/>
+                                        {tournament.status === 'preparation' && "🟢 Příprava"}
+                                        {tournament.status === 'running' && "🟡 Probíhá"}
+                                        {tournament.status === 'ended' && "🔴 Ukončen"}
                                     </td>
                                     <td>
                                         {tournament.current_round ?
-                                            `Kolo ${tournament.current_round}/${tournament.rounds}` :
-                                            `Počet kol: ${tournament.rounds}`
+                                            `⚪ Kolo ${tournament.current_round}/${tournament.rounds}` :
+                                            `⚪ ${tournament.rounds} ${parseInt(tournament.rounds, 10) === 1 ? 'kolo' : (tournament.rounds >= 2 && tournament.rounds <= 4) ? 'kola' : 'kol'}`
                                         }
                                     </td>
                                     <td>
-                                        Hráči: {tournament.player_count}<br/>
-                                        Zápasy: {tournament.match_count}
+                                        👥 {tournament.player_count}<br/>
+                                        ⚔️ {tournament.match_count}
                                     </td>
                                 </tr>
                             ))}
