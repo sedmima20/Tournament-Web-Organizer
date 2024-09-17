@@ -13,16 +13,136 @@ export default function TournamentSettingsPage({ tournamentData, triggerTourname
     const { loggedUserData, setLoggedUserData } = useContext(LoggedUserDataContext)
     const [dialogAlertContent, setDialogAlertContent] = useState(undefined)
     const [isOngoingRequest, setIsOngoingRequest] = useState(false)
+    const [isChangeTournamentNameDialogOpen, setIsChangeTournamentNameDialogOpen] = useState(false)
+    const [isChangeTournamentDescriptionDialogOpen, setIsChangeTournamentDescriptionDialogOpen] = useState(false)
     const [isNumberOfRoundsHelpDialogOpen, setIsNumberOfRoundsHelpDialogOpen] = useState(false)
     const [isTournamentFormatInfoDialogOpen, setIsTournamentFormatInfoDialogOpen] = useState(false)
     const [isWipeAllPlayersDialogOpen, setIsWipeAllPlayersDialogOpen] = useState(false)
     const [isDeleteTournamentDialogOpen, setIsDeleteTournamentDialogOpen] = useState(false)
+    const [changeTournamentNameFormData, setChangeTournamentNameFormData] = useState({tournamentName: ""})
+    const [changeTournamentDescriptionFormData, setChangeTournamentDescriptionFormData] = useState({tournamentDescription: ""})
     const [deleteTournamentFormData, setDeleteTournamentFormData] = useState({tournamentName: ""})
     const navigate = useNavigate()
+    const changeTournamentNameRequest = useTwoApiRequest()
+    const changeTournamentDescriptionRequest = useTwoApiRequest()
+    const removeTournamentDescriptionRequest = useTwoApiRequest()
     const changeNumberOfRoundsRequest = useTwoApiRequest()
     const changeTournamentVisibilityRequest = useTwoApiRequest()
     const wipeAllPlayersRequest = useTwoApiRequest()
     const deleteTournamentRequest = useTwoApiRequest()
+
+    function handleChangeTournamentNameClick() {
+        setIsChangeTournamentNameDialogOpen(true)
+        setChangeTournamentNameFormData({tournamentName: tournamentData.tournament.name})
+    }
+
+    function handleChangeTournamentNameFormDataChange(event) {
+        setChangeTournamentNameFormData(prevChangeTournamentNameFormData => {
+            return {
+                ...prevChangeTournamentNameFormData,
+                [event.target.name]: event.target.value
+            }
+        })
+    }
+
+    function handleChangeTournamentNameFormSubmit() {
+        if (changeTournamentNameFormData.tournamentName && !isOngoingRequest) {
+            if (changeTournamentNameFormData.tournamentName !== tournamentData.tournament.name) {
+                setIsOngoingRequest(true)
+                changeTournamentNameRequest.fetchData({
+                    endpoint: 'update_tournament',
+                    tournament_id: tournamentData.tournament.id,
+                    token: token,
+                    new_name: changeTournamentNameFormData.tournamentName
+                })
+                    .then((data) => {
+                        if (data.statusCode === 204) {
+                            setAlertContent({ msg: 'Turnaj byl přejmenován 👍', severity: 'info' })
+                            closeChangeTournamentNameDialog()
+                            triggerTournamentReload()
+                        } else {
+                            setDialogAlertContent({ msg: 'Něco se pokazilo, turnaj se nám nepodařilo přejmenovat.', severity: 'error' })
+                        }
+                        setIsOngoingRequest(false)
+                    })
+            } else {
+                closeChangeTournamentNameDialog()
+            }
+        }
+    }
+
+    function closeChangeTournamentNameDialog() {
+        setIsChangeTournamentNameDialogOpen(false)
+        setChangeTournamentNameFormData({tournamentName: ""})
+        setDialogAlertContent(undefined)
+    }
+
+    function handleChangeTournamentDescriptionClick() {
+        setIsChangeTournamentDescriptionDialogOpen(true)
+        setChangeTournamentDescriptionFormData({tournamentDescription: tournamentData.tournament.description ?? ""})
+    }
+
+    function handleChangeTournamentDescriptionFormDataChange(event) {
+        setChangeTournamentDescriptionFormData(prevChangeTournamentDescriptionFormData => {
+            return {
+                ...prevChangeTournamentDescriptionFormData,
+                [event.target.name]: event.target.value
+            }
+        })
+    }
+
+    function handleChangeTournamentDescriptionFormSubmit() {
+        if (!isOngoingRequest) {
+            if (changeTournamentDescriptionFormData.tournamentDescription !== (tournamentData.tournament.description ?? '')) {
+                setIsOngoingRequest(true)
+                changeTournamentDescriptionRequest.fetchData({
+                    endpoint: 'update_tournament',
+                    tournament_id: tournamentData.tournament.id,
+                    token: token,
+                    new_description: changeTournamentDescriptionFormData.tournamentDescription ? changeTournamentDescriptionFormData.tournamentDescription : 'clear'
+                })
+                    .then((data) => {
+                        if (data.statusCode === 204) {
+                            setAlertContent({ msg: changeTournamentDescriptionFormData.tournamentDescription ? 'Popis byl uložen 👍' : 'Popis byl odebrán 👍', severity: 'info' })
+                            closeChangeTournamentDescriptionDialog()
+                            triggerTournamentReload()
+                        } else {
+                            setDialogAlertContent({ msg: changeTournamentDescriptionFormData.tournamentDescription ? 'Něco se pokazilo, popis se nám nepodařilo uložit.' : 'Něco se pokazilo, popis se nám nepodařilo odebrat.', severity: 'error' })
+                        }
+                        setIsOngoingRequest(false)
+                    })
+            } else {
+                closeChangeTournamentDescriptionDialog()
+            }
+        }
+    }
+
+    function closeChangeTournamentDescriptionDialog() {
+        setIsChangeTournamentDescriptionDialogOpen(false)
+        setChangeTournamentDescriptionFormData({tournamentDescription: ""})
+        setDialogAlertContent(undefined)
+    }
+
+    function handleRemoveTournamentDescriptionFormSubmit() {
+        if (!isOngoingRequest && tournamentData.tournament.description) {
+            setIsOngoingRequest(true)
+            removeTournamentDescriptionRequest.fetchData({
+                endpoint: 'update_tournament',
+                tournament_id: tournamentData.tournament.id,
+                token: token,
+                new_description: 'clear'
+            })
+                .then((data) => {
+                    if (data.statusCode === 204) {
+                        setAlertContent({ msg: 'Popis byl odebrán 👍', severity: 'info' })
+                        triggerTournamentReload()
+                    } else {
+                        setAlertContent({ msg: 'Něco se pokazilo, popis se nám nepodařilo odebrat.', severity: 'error' })
+                    }
+                    setIsOngoingRequest(false)
+                })
+        }
+    }
 
     function handleTournamentFormatInfoClick() {
         setIsTournamentFormatInfoDialogOpen(true)
@@ -162,6 +282,52 @@ export default function TournamentSettingsPage({ tournamentData, triggerTourname
 
     return (
         <>
+            {isChangeTournamentNameDialogOpen &&
+                <ModalDialog onClose={closeChangeTournamentNameDialog}>
+                    <img src={closingX} alt="dialog-closing-x-icon" onClick={closeChangeTournamentNameDialog}/>
+                    {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                    <h2>Upravit název turnaje</h2>
+                    <input
+                        type="text"
+                        placeholder="Název turnaje"
+                        onChange={handleChangeTournamentNameFormDataChange}
+                        name="tournamentName"
+                        value={changeTournamentNameFormData.tournamentName}
+                        maxLength="100"
+                        disabled={isOngoingRequest}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                                handleChangeTournamentNameFormSubmit()
+                            }
+                        }}
+                    />
+                    <button onClick={handleChangeTournamentNameFormSubmit} disabled={!changeTournamentNameFormData.tournamentName || isOngoingRequest}>Přejmenovat turnaj</button>
+                    <button onClick={closeChangeTournamentNameDialog} disabled={isOngoingRequest}>Zrušit</button>
+                </ModalDialog>
+            }
+            {isChangeTournamentDescriptionDialogOpen &&
+                <ModalDialog onClose={closeChangeTournamentDescriptionDialog}>
+                    <img src={closingX} alt="dialog-closing-x-icon" onClick={closeChangeTournamentDescriptionDialog}/>
+                    {dialogAlertContent && <div className={dialogAlertContent.severity + "-box"}>{dialogAlertContent.msg}</div>}
+                    <h2>{tournamentData.tournament.description ? "Upravit popis turnaje" : "Přidat popis turnaje"}</h2>
+                    <p>Do popisu můžeš vložit datum, čas a místo konání, podrobnější informace o turnaji, startovné, ceny, jak se přihlásit, odkaz na propozice a pravidla nebo na webové stránky, kontakt na organizátora apod.</p>
+                    <textarea
+                        onChange={handleChangeTournamentDescriptionFormDataChange}
+                        name="tournamentDescription"
+                        value={changeTournamentDescriptionFormData.tournamentDescription}
+                        maxLength="300"
+                        disabled={isOngoingRequest}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' && event.shiftKey) {
+                                handleChangeTournamentDescriptionFormSubmit()
+                            }
+                        }}
+                    />
+                    <p>Zbývá {300 - changeTournamentDescriptionFormData.tournamentDescription.length} znaků.</p>
+                    <button onClick={handleChangeTournamentDescriptionFormSubmit} disabled={isOngoingRequest}>{tournamentData.tournament.description ? "Uložit změny" : "Uložit"}</button>
+                    <button onClick={closeChangeTournamentDescriptionDialog} disabled={isOngoingRequest}>{tournamentData.tournament.description ? "Zahodit změny" : "Zrušit"}</button>
+                </ModalDialog>
+            }
             {isTournamentFormatInfoDialogOpen &&
                 <ModalDialog onClose={closeTournamentFormatInfoDialog}>
                     <img src={closingX} alt="dialog-closing-x-icon" onClick={closeTournamentFormatInfoDialog}/>
@@ -250,6 +416,18 @@ export default function TournamentSettingsPage({ tournamentData, triggerTourname
                         <>
                             <section>
                                 <h2>Název a popis</h2>
+                                <p style={{ fontWeight: 'bold' }} onDoubleClick={handleChangeTournamentNameClick}>{tournamentData.tournament.name}</p>
+                                <button onClick={handleChangeTournamentNameClick} disabled={isOngoingRequest}>Změnit název turnaje</button>
+                                {tournamentData.tournament.description &&
+                                    <p style={{ whiteSpace: 'pre-line', fontStyle: 'italic' }} onDoubleClick={handleChangeTournamentDescriptionClick}>{tournamentData.tournament.description}</p>
+                                }
+                                <button onClick={handleChangeTournamentDescriptionClick} disabled={isOngoingRequest}>{tournamentData.tournament.description ? "Upravit popis ✏️" : "Přidat popis turnaje ➕"}</button>
+                                {tournamentData.tournament.description &&
+                                    <button onClick={handleRemoveTournamentDescriptionFormSubmit} disabled={isOngoingRequest}>Odebrat popis 🗑️</button>
+                                }
+                                {!tournamentData.tournament.description &&
+                                    <p>Do popisu můžeš vložit datum, čas a místo konání, podrobnější informace o turnaji, startovné, ceny, jak se přihlásit, odkaz na propozice a pravidla nebo na webové stránky, kontakt na organizátora apod.</p>
+                                }
                             </section>
                             <section>
                                 <h2>Formát turnaje</h2>
@@ -302,13 +480,13 @@ export default function TournamentSettingsPage({ tournamentData, triggerTourname
                         <h2>Nebezpečná zóna</h2>
                         {tournamentData.tournament.status === 'preparation' && tournamentData.players &&
                             <>
-                                <button onClick={handleWipeAllPlayersClick} disabled={isOngoingRequest || tournamentData.players.length === 0}>Smazat všechny hráče/týmy</button>
+                                <button onClick={handleWipeAllPlayersClick} disabled={isOngoingRequest || tournamentData.players.length === 0}>Smazat všechny hráče/týmy ❌</button>
                                 {tournamentData.players.length === 0 &&
                                     <p>(seznam účastníků je prázdný)</p>
                                 }
                             </>
                         }
-                        <button onClick={handleDeleteTournamentClick} disabled={isOngoingRequest}>Odstranit turnaj</button>
+                        <button onClick={handleDeleteTournamentClick} disabled={isOngoingRequest}>Odstranit turnaj ❌</button>
                     </section>
                 </>
             }
