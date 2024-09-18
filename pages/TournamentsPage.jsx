@@ -176,10 +176,10 @@ export default function TournamentsPage() {
                             {tournamentsData.map((tournament) => (
                                 <tr key={tournament.id}>
                                     <td>
-                                        <Link to={'/tournament/' + tournament.id}>{tournament.name}</Link> #{tournament.id}
+                                        <Link to={'/tournament/' + tournament.id}>{tournament.name}</Link><small> #{tournament.id}</small>
                                         {tournament.description && <><br/>{tournament.description}</>}
                                     </td>
-                                    <td>Organizuje: {tournament.owner_username}</td>
+                                    <td>🙋 <Link to={"/tournaments/" + tournament.owner_username}>{tournament.owner_username}</Link></td>
                                     <td>
                                         {tournament.visibility === 'public' ? "👁️ Veřejně viditelný" : "🔒 Soukromý"}<br/>
                                         {tournament.status === 'preparation' && "🟢 Příprava"}
@@ -187,9 +187,9 @@ export default function TournamentsPage() {
                                         {tournament.status === 'ended' && "🔴 Ukončen"}
                                     </td>
                                     <td>
-                                        {tournament.current_round ?
+                                        {tournament.current_round || tournament.status === 'running' ?
                                             `⚪ Kolo ${tournament.current_round}/${tournament.rounds}` :
-                                            `⚪ ${tournament.rounds} ${parseInt(tournament.rounds, 10) === 1 ? 'kolo' : (tournament.rounds >= 2 && tournament.rounds <= 4) ? 'kola' : 'kol'}`
+                                            `⚪ ${tournament.rounds} ${tournament.rounds === '1' ? 'kolo' : (tournament.rounds >= 2 && tournament.rounds <= 4) ? 'kola' : 'kol'}`
                                         }
                                     </td>
                                     <td>

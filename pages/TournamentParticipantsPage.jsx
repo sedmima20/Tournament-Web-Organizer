@@ -325,7 +325,7 @@ export default function TournamentParticipantsPage({ tournamentData, triggerTour
                                             data-player-prev-name={player.name}
                                         />
                                     }
-                                    <span> #{player.id}</span>
+                                    <small> #{player.id}</small>
                                     {tournamentData.hasTournamentWriteAccess && tournamentData.tournament.status !== 'ended' &&
                                         <>
                                             {player.excluded === "1" &&
